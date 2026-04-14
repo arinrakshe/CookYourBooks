@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+  Recipe Editor view.
+
+  Two logical modes controlled by the ViewModel's editingProperty:
+    - View mode:  title/ingredients/instructions shown as read-only labels
+    - Edit mode:  title becomes a TextField, ingredients become editable rows,
+                  Save/Discard buttons appear, Edit button is replaced
+
+  The controller binds all controls to the ViewModel in initialize().
+-->
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:id="root"
+            styleClass="recipe-editor">
+
+    <!-- ── Top bar: title + action buttons ── -->
+    <top>
+        <VBox styleClass="editor-header">
+            <padding>
+                <Insets top="16" right="16" bottom="8" left="16"/>
+            </padding>
+
+            <!-- View mode: static title label -->
+            <Label fx:id="titleLabel" styleClass="recipe-title" wrapText="true"/>
+
+            <!-- Edit mode: editable title field (hidden in view mode) -->
+            <TextField fx:id="titleField"
+                       promptText="Recipe title"
+                       styleClass="title-field"/>
+
+            <!-- Toolbar: buttons change depending on edit mode -->
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <padding>
+                    <Insets top="8"/>
+                </padding>
+                <!-- Shown in view mode -->
+                <Button fx:id="editButton" text="Edit" styleClass="action-button"/>
+                <!-- Shown in edit mode -->
+                <Button fx:id="saveButton" text="Save" styleClass="action-button-primary"/>
+                <Button fx:id="discardButton" text="Discard Changes" styleClass="action-button"/>
+            </HBox>
+
+            <!-- Status / error message (e.g. "Saved successfully." or "Save failed: ...") -->
+            <Label fx:id="statusLabel" styleClass="status-label" wrapText="true"/>
+        </VBox>
+    </top>
+
+    <!-- ── Center: ingredients + instructions ── -->
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="editor-scroll">
+            <VBox spacing="16">
+                <padding>
+                    <Insets top="8" right="16" bottom="16" left="16"/>
+                </padding>
+
+                <!-- Ingredients section -->
+                <VBox spacing="4">
+                    <HBox alignment="CENTER_LEFT" spacing="8">
+                        <Label text="Ingredients" styleClass="section-header"/>
+                        <!-- Add Ingredient button — only visible in edit mode -->
+                        <Button fx:id="addIngredientButton"
+                                text="+ Add"
+                                styleClass="small-button"/>
+                    </HBox>
+
+                    <!--
+                      ListView of ingredients. In view mode, cells display a read-only string.
+                      In edit mode, cells render editable fields (name, amount, unit, vague checkbox,
+                      remove button) via a custom cell factory set in the controller.
+                    -->
+                    <ListView fx:id="ingredientListView"
+                              prefHeight="200"
+                              styleClass="ingredient-list"/>
+                </VBox>
+
+                <!-- Instructions section (read-only — editing instructions is out of scope) -->
+                <VBox spacing="4">
+                    <Label text="Instructions" styleClass="section-header"/>
+                    <ListView fx:id="instructionListView"
+                              prefHeight="200"
+                              styleClass="instruction-list"/>
+                </VBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+
+</BorderPane>

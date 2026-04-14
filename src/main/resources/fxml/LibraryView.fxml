@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<!-- Library: collections as a wrapping grid of cards + recipe list. -->
+<HBox xmlns:fx="http://javafx.com/fxml"
+      stylesheets="@../css/cookyourbooks.css"
+      spacing="16">
+    <padding>
+        <Insets top="8" right="8" bottom="8" left="8"/>
+    </padding>
+
+    <!-- Collections column -->
+    <VBox spacing="8" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+        <Label text="Recipe collections" styleClass="section-title"/>
+        <HBox spacing="8" alignment="CENTER_LEFT">
+            <Label text="Filter:"/>
+            <TextField fx:id="filterField" promptText="Filter by title…" prefWidth="220" HBox.hgrow="SOMETIMES"/>
+            <ProgressIndicator fx:id="loadingIndicator" maxHeight="24" maxWidth="24"/>
+        </HBox>
+        <ScrollPane fx:id="collectionScroll" styleClass="library-collection-scroll" fitToWidth="true"
+                    hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+            <FlowPane fx:id="collectionCardGrid" styleClass="library-collection-grid"/>
+        </ScrollPane>
+        <HBox spacing="8">
+            <Button fx:id="newCollectionButton" text="New collection"/>
+            <Button fx:id="deleteCollectionButton" text="Delete collection"/>
+        </HBox>
+        <HBox spacing="8" alignment="CENTER_LEFT">
+            <Button fx:id="undoButton" text="Undo"/>
+            <Label fx:id="undoLabel" styleClass="status-label" wrapText="true" maxWidth="Infinity"/>
+        </HBox>
+    </VBox>
+
+    <!-- Recipes column -->
+    <VBox spacing="8" prefWidth="280" minWidth="240" HBox.hgrow="NEVER">
+        <Label text="Recipes in collection" styleClass="section-title"/>
+        <ListView fx:id="recipeList" prefHeight="320" VBox.vgrow="ALWAYS"/>
+        <Button fx:id="openRecipeButton" text="Open recipe" maxWidth="Infinity"/>
+    </VBox>
+</HBox>

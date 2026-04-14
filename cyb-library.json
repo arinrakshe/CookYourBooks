@@ -1,0 +1,91 @@
+{
+  "collections" : [ {
+    "type" : "personal",
+    "id" : "1eb2bb49-e5bd-4946-a247-a88c6b663bba",
+    "title" : "Weeknight Favorites",
+    "recipes" : [ {
+      "id" : "demo-recipe-pasta",
+      "title" : "One-Pot Tomato Pasta",
+      "servings" : null,
+      "ingredients" : [ {
+        "type" : "vague",
+        "name" : "dried pasta",
+        "description" : null,
+        "preparation" : null,
+        "notes" : null
+      }, {
+        "type" : "vague",
+        "name" : "canned tomatoes",
+        "description" : null,
+        "preparation" : null,
+        "notes" : null
+      } ],
+      "instructions" : [ {
+        "stepNumber" : 1,
+        "text" : "Simmer tomatoes; cook pasta until tender.",
+        "ingredientRefs" : [ ]
+      } ],
+      "conversionRules" : [ ]
+    }, {
+      "id" : "demo-recipe-salad",
+      "title" : "Quick Garden Salad",
+      "servings" : null,
+      "ingredients" : [ {
+        "type" : "vague",
+        "name" : "mixed greens",
+        "description" : null,
+        "preparation" : null,
+        "notes" : null
+      } ],
+      "instructions" : [ {
+        "stepNumber" : 1,
+        "text" : "Toss greens with dressing.",
+        "ingredientRefs" : [ ]
+      } ],
+      "conversionRules" : [ ]
+    } ],
+    "description" : null,
+    "notes" : null,
+    "sourceType" : "PERSONAL"
+  }, {
+    "type" : "personal",
+    "id" : "5689398a-fb89-452a-96c2-4ea4d2016e29",
+    "title" : "Baking Basics (Demo)",
+    "recipes" : [ {
+      "id" : "demo-recipe-muffins",
+      "title" : "Morning Muffins",
+      "servings" : null,
+      "ingredients" : [ {
+        "type" : "vague",
+        "name" : "flour",
+        "description" : null,
+        "preparation" : null,
+        "notes" : null
+      }, {
+        "type" : "vague",
+        "name" : "sugar",
+        "description" : null,
+        "preparation" : null,
+        "notes" : null
+      } ],
+      "instructions" : [ {
+        "stepNumber" : 1,
+        "text" : "Mix dry and wet; bake at 375°F.",
+        "ingredientRefs" : [ ]
+      } ],
+      "conversionRules" : [ ]
+    } ],
+    "description" : null,
+    "notes" : null,
+    "sourceType" : "PERSONAL"
+  }, {
+    "type" : "personal",
+    "id" : "0e3b92cc-5b0d-4b93-a95a-290bb2de547f",
+    "title" : "Saved from the Web (demo — empty)",
+    "recipes" : [ ],
+    "description" : null,
+    "notes" : null,
+    "sourceType" : "PERSONAL"
+  } ],
+  "houseConversions" : [ ]
+}

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<!--
+  Search & Filter view for CookYourBooks.
+
+  Layout:
+    Top    – search bar + progress indicator + status label
+    Left   – ingredient filter panel (add/remove filters, active filter list)
+    Center – results ListView with keyboard navigation hint
+-->
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="app.cookyourbooks.gui.view.SearchViewController"
+            stylesheets="@../css/cookyourbooks.css">
+
+    <!-- ── Top: search bar ─────────────────────────────────────────── -->
+    <top>
+        <VBox spacing="6">
+            <padding><Insets top="8" right="8" bottom="8" left="8"/></padding>
+
+            <Label text="Search Recipes" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <TextField fx:id="queryField"
+                           promptText="Search by title…"
+                           HBox.hgrow="ALWAYS"
+                           maxWidth="Infinity"/>
+                <ProgressIndicator fx:id="progressIndicator"
+                                   prefWidth="24" prefHeight="24"
+                                   visible="false" managed="false"/>
+                <Button fx:id="clearButton" text="Clear"/>
+            </HBox>
+
+            <Label fx:id="statusLabel" text=""/>
+        </VBox>
+    </top>
+
+    <!-- ── Left: ingredient filter panel ──────────────────────────── -->
+    <left>
+        <VBox spacing="6" prefWidth="180">
+            <padding><Insets top="8" right="8" bottom="8" left="8"/></padding>
+
+            <Label text="Filter by ingredient"
+                   style="-fx-font-weight: bold;"/>
+
+            <HBox spacing="4">
+                <TextField fx:id="filterInputField"
+                           promptText="Ingredient…"
+                           HBox.hgrow="ALWAYS"
+                           maxWidth="Infinity"/>
+                <Button fx:id="addFilterButton" text="Add"/>
+            </HBox>
+
+            <Label text="Active filters:"/>
+            <ListView fx:id="filterListView" prefHeight="160"/>
+
+            <Button fx:id="removeFilterButton" text="Remove selected" maxWidth="Infinity"/>
+        </VBox>
+    </left>
+
+    <!-- ── Center: results list ────────────────────────────────────── -->
+    <center>
+        <VBox spacing="4">
+            <padding><Insets top="8" right="8" bottom="8" left="8"/></padding>
+
+            <Label text="Results (↑↓ to navigate, Enter to open)"
+                   style="-fx-text-fill: #888;"/>
+            <ListView fx:id="resultsListView" VBox.vgrow="ALWAYS"/>
+        </VBox>
+    </center>
+
+</BorderPane>
