@@ -16,9 +16,11 @@ import javafx.concurrent.Task;
 import org.jspecify.annotations.Nullable;
 
 import app.cookyourbooks.gui.BackgroundTaskRunner;
+import app.cookyourbooks.gui.NavigationService;
 import app.cookyourbooks.model.Ingredient;
 import app.cookyourbooks.model.Recipe;
 import app.cookyourbooks.model.RecipeCollection;
+import app.cookyourbooks.model.UnitSystem;
 import app.cookyourbooks.services.LibrarianService;
 import app.cookyourbooks.services.ocr.RecipeOcrService;
 
@@ -26,6 +28,7 @@ public class ImportViewModelImpl implements ImportViewModel {
 
   private final RecipeOcrService ocrService;
   private final LibrarianService librarianService;
+  private final NavigationService navigationService;
 
   private final StringProperty statusMessage;
   private final StringProperty errorMessage;
@@ -46,9 +49,13 @@ public class ImportViewModelImpl implements ImportViewModel {
    * @param ocrService the OCR service used to extract recipes from images
    * @param librarianService the librarian service used to manage recipe collections
    */
-  public ImportViewModelImpl(RecipeOcrService ocrService, LibrarianService librarianService) {
+  public ImportViewModelImpl(
+      RecipeOcrService ocrService,
+      LibrarianService librarianService,
+      NavigationService navigationService) {
     this.ocrService = ocrService;
     this.librarianService = librarianService;
+    this.navigationService = navigationService;
 
     this.statusMessage = new SimpleStringProperty("Ready");
     this.errorMessage = new SimpleStringProperty("");
@@ -62,6 +69,12 @@ public class ImportViewModelImpl implements ImportViewModel {
 
     this.currentState = new SimpleStringProperty("idle");
     this.importProgress = new SimpleDoubleProperty(0.0);
+
+    this.navigationService.unitSystemProperty().addListener((obs, oldValue, newValue) -> {});
+  }
+
+  public ImportViewModelImpl(RecipeOcrService ocrService, LibrarianService librarianService) {
+    this(ocrService, librarianService, new NavigationService());
   }
 
   /**
@@ -381,5 +394,9 @@ public class ImportViewModelImpl implements ImportViewModel {
   @Override
   public DoubleProperty importProgressProperty() {
     return importProgress;
+  }
+
+  public UnitSystem getUnitSystem() {
+    return navigationService.getUnitSystem();
   }
 }

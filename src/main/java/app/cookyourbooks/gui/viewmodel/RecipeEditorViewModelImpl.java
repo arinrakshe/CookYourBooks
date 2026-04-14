@@ -1,6 +1,7 @@
 package app.cookyourbooks.gui.viewmodel;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -11,9 +12,16 @@ import javafx.collections.ObservableList;
 
 import org.jspecify.annotations.Nullable;
 
+import app.cookyourbooks.conversion.ConversionRegistry;
+import app.cookyourbooks.exception.UnsupportedConversionException;
 import app.cookyourbooks.gui.BackgroundTaskRunner;
+import app.cookyourbooks.gui.NavigationService;
 import app.cookyourbooks.model.Ingredient;
+import app.cookyourbooks.model.MeasuredIngredient;
+import app.cookyourbooks.model.Quantity;
 import app.cookyourbooks.model.Recipe;
+import app.cookyourbooks.model.Unit;
+import app.cookyourbooks.model.UnitSystem;
 import app.cookyourbooks.repository.RecipeRepository;
 
 /**
@@ -42,6 +50,8 @@ import app.cookyourbooks.repository.RecipeRepository;
 public class RecipeEditorViewModelImpl implements RecipeEditorViewModel {
 
   private final RecipeRepository recipeRepository;
+  private final NavigationService navigationService;
+  private final Supplier<ConversionRegistry> conversionRegistrySupplier;
 
   // ──────────────────────────────────────────────────────────────────────────
   // Internal state (not exposed to the View)
@@ -62,6 +72,8 @@ public class RecipeEditorViewModelImpl implements RecipeEditorViewModel {
    * changes mark the state dirty.
    */
   private boolean suppressDirtyTracking = false;
+
+  private boolean suppressUnitRollback = false;
 
   // ──────────────────────────────────────────────────────────────────────────
   // Observable properties (bound to the View via FXML controller)
@@ -92,10 +104,23 @@ public class RecipeEditorViewModelImpl implements RecipeEditorViewModel {
   /** Displays feedback to the user, e.g. "Saved successfully." or "Save failed: ...". */
   private final StringProperty statusMessage = new SimpleStringProperty("");
 
-  public RecipeEditorViewModelImpl(RecipeRepository recipeRepository) {
+  public RecipeEditorViewModelImpl(
+      RecipeRepository recipeRepository,
+      NavigationService navigationService,
+      Supplier<ConversionRegistry> conversionRegistrySupplier) {
     this.recipeRepository = recipeRepository;
+    this.navigationService = navigationService;
+    this.conversionRegistrySupplier = conversionRegistrySupplier;
     attachDirtyListeners();
     attachValidationListeners();
+    attachUnitSystemListener();
+  }
+
+  public RecipeEditorViewModelImpl(RecipeRepository recipeRepository) {
+    this(
+        recipeRepository,
+        new NavigationService(),
+        app.cookyourbooks.conversion.LayeredConversionRegistry::new);
   }
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -150,6 +175,32 @@ public class RecipeEditorViewModelImpl implements RecipeEditorViewModel {
    */
   private void attachValidationListeners() {
     title.addListener((obs, oldVal, newVal) -> isValid.set(newVal != null && !newVal.isBlank()));
+  }
+
+  /** Keeps editable measured ingredients synchronized with the app-wide unit system. */
+  private void attachUnitSystemListener() {
+    navigationService
+        .unitSystemProperty()
+        .addListener(
+            (obs, oldValue, newValue) -> {
+              if (oldValue == null || newValue == null || oldValue == newValue) {
+                return;
+              }
+              if (suppressUnitRollback) {
+                return;
+              }
+              if (isDirty.get()) {
+                suppressUnitRollback = true;
+                navigationService.setUnitSystem(oldValue);
+                suppressUnitRollback = false;
+                statusMessage.set("Save or discard edits before changing unit system.");
+                return;
+              }
+              ConversionSummary summary = convertIngredientsToSystem(newValue);
+              if (!summary.anyConverted()) {
+                statusMessage.set("No measurable ingredients to convert.");
+              }
+            });
   }
 
   // ──────────────────────────────────────────────────────────────────────────
@@ -235,8 +286,12 @@ public class RecipeEditorViewModelImpl implements RecipeEditorViewModel {
    */
   @Override
   public void save() {
-    // E10: no-op when not dirty or not valid
-    if (!isDirty.get() || !isValid.get()) {
+    if (!isDirty.get()) {
+      statusMessage.set("No changes to save.");
+      return;
+    }
+    if (!isValid.get()) {
+      statusMessage.set("Title cannot be blank.");
       return;
     }
     if (originalRecipe == null) {
@@ -394,6 +449,7 @@ public class RecipeEditorViewModelImpl implements RecipeEditorViewModel {
     title.set(recipe.getTitle());
     // Wrap each domain Ingredient in an EditableIngredient for UI binding
     ingredients.setAll(recipe.getIngredients().stream().map(EditableIngredient::new).toList());
+    convertIngredientsToSystem(navigationService.getUnitSystem());
     // Format instructions as "1. Step text" for display in the read-only list
     instructions.setAll(
         recipe.getInstructions().stream()
@@ -404,4 +460,64 @@ public class RecipeEditorViewModelImpl implements RecipeEditorViewModel {
     isValid.set(!recipe.getTitle().isBlank()); // sync validation state with loaded title
     statusMessage.set(""); // clear any previous save/error message
   }
+
+  private ConversionSummary convertIngredientsToSystem(UnitSystem targetSystem) {
+    ConversionRegistry registry = conversionRegistrySupplier.get();
+    boolean sawMeasuredIngredient = false;
+    boolean anyConverted = false;
+    suppressDirtyTracking = true;
+    for (EditableIngredient ingredient : ingredients) {
+      ConversionResult result = convertIngredientIfPossible(ingredient, targetSystem, registry);
+      sawMeasuredIngredient = sawMeasuredIngredient || result.wasMeasured();
+      anyConverted = anyConverted || result.converted();
+    }
+    suppressDirtyTracking = false;
+    return new ConversionSummary(sawMeasuredIngredient, anyConverted);
+  }
+
+  private ConversionResult convertIngredientIfPossible(
+      EditableIngredient ingredient, UnitSystem targetSystem, ConversionRegistry registry) {
+    if (ingredient.isVague()) {
+      return new ConversionResult(false, false);
+    }
+    var parsed = ingredient.toIngredient();
+    if (parsed.isEmpty() || !(parsed.get() instanceof MeasuredIngredient measured)) {
+      return new ConversionResult(false, false);
+    }
+    Unit sourceUnit = measured.getQuantity().getUnit();
+    if (sourceUnit.getSystem() == UnitSystem.HOUSE || sourceUnit.getSystem() == targetSystem) {
+      return new ConversionResult(true, false);
+    }
+    var rule = registry.findConversionToSystem(sourceUnit, targetSystem);
+    if (rule.isEmpty()) {
+      return new ConversionResult(true, false);
+    }
+    try {
+      Quantity converted =
+          registry.convert(measured.getQuantity(), rule.get().toUnit(), ingredient.getName());
+      ingredient.amountProperty().set(extractAmountString(converted));
+      ingredient.unitProperty().set(converted.getUnit().getAbbreviation());
+      return new ConversionResult(true, true);
+    } catch (UnsupportedConversionException | RuntimeException conversionError) {
+      // Leave ingredient unchanged when unsupported or invalid.
+      return new ConversionResult(true, false);
+    }
+  }
+
+  private String extractAmountString(Quantity quantity) {
+    String unitAbbreviation = quantity.getUnit().getAbbreviation();
+    String unitPlural = quantity.getUnit().getPluralAbbreviation();
+    String value = quantity.toString();
+    if (!unitAbbreviation.equals(unitPlural) && value.endsWith(" " + unitPlural)) {
+      return value.substring(0, value.length() - unitPlural.length() - 1).trim();
+    }
+    if (value.endsWith(" " + unitAbbreviation)) {
+      return value.substring(0, value.length() - unitAbbreviation.length() - 1).trim();
+    }
+    return value;
+  }
+
+  private record ConversionResult(boolean wasMeasured, boolean converted) {}
+
+  private record ConversionSummary(boolean hadMeasuredIngredients, boolean anyConverted) {}
 }

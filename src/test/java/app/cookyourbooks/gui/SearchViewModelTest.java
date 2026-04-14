@@ -13,6 +13,7 @@ import app.cookyourbooks.cli.fixtures.TestRecipeBuilder;
 import app.cookyourbooks.gui.viewmodel.SearchViewModelImpl;
 import app.cookyourbooks.model.Recipe;
 import app.cookyourbooks.model.Unit;
+import app.cookyourbooks.model.UnitSystem;
 import app.cookyourbooks.services.LibrarianService;
 
 /**
@@ -48,7 +49,7 @@ class SearchViewModelTest extends ViewModelTestBase {
   @BeforeEach
   void setUp() {
     librarianService = mock(LibrarianService.class);
-    navigationService = mock(app.cookyourbooks.gui.NavigationService.class);
+    navigationService = new app.cookyourbooks.gui.NavigationService();
 
     chocolateCake =
         TestRecipeBuilder.recipe("Chocolate Cake")
@@ -215,7 +216,9 @@ class SearchViewModelTest extends ViewModelTestBase {
 
     viewModel.navigateToSelectedResult();
 
-    org.mockito.Mockito.verify(navigationService).navigateToRecipe(chocolateCake.getId());
+    assertThat(navigationService.getSelectedRecipeId()).isEqualTo(chocolateCake.getId());
+    assertThat(navigationService.getCurrentView())
+        .isEqualTo(app.cookyourbooks.gui.NavigationService.View.RECIPE_EDITOR);
   }
 
   // ── No-op when no results ────────────────────────────────────────────────
@@ -244,5 +247,17 @@ class SearchViewModelTest extends ViewModelTestBase {
     waitForFxEvents();
 
     assertThat(viewModel.getIngredientFilters()).isEmpty();
+  }
+
+  @Test
+  void globalUnitMode_propagatesFromNavigationService() {
+    app.cookyourbooks.gui.NavigationService realNavigation =
+        new app.cookyourbooks.gui.NavigationService();
+    SearchViewModelImpl vmWithRealNavigation =
+        new SearchViewModelImpl(librarianService, realNavigation);
+
+    assertThat(vmWithRealNavigation.getUnitSystem()).isEqualTo(UnitSystem.IMPERIAL);
+    realNavigation.setUnitSystem(UnitSystem.METRIC);
+    assertThat(vmWithRealNavigation.getUnitSystem()).isEqualTo(UnitSystem.METRIC);
   }
 }

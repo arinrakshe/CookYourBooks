@@ -56,15 +56,23 @@
       "title" : "Morning Muffins",
       "servings" : null,
       "ingredients" : [ {
-        "type" : "vague",
+        "type" : "measured",
         "name" : "flour",
-        "description" : null,
+        "quantity" : {
+          "type" : "exact",
+          "amount" : 1.0,
+          "unit" : "CUP"
+        },
         "preparation" : null,
         "notes" : null
       }, {
-        "type" : "vague",
+        "type" : "measured",
         "name" : "sugar",
-        "description" : null,
+        "quantity" : {
+          "type" : "exact",
+          "amount" : 1.0,
+          "unit" : "CUP"
+        },
         "preparation" : null,
         "notes" : null
       } ],

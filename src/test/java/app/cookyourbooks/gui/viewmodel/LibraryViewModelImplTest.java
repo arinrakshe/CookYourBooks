@@ -34,6 +34,7 @@ import app.cookyourbooks.model.PersonalCollectionImpl;
 import app.cookyourbooks.model.Recipe;
 import app.cookyourbooks.model.RecipeCollection;
 import app.cookyourbooks.model.SourceType;
+import app.cookyourbooks.model.UnitSystem;
 import app.cookyourbooks.services.LibrarianService;
 
 @ExtendWith(MockitoExtension.class)
@@ -357,5 +358,12 @@ class LibraryViewModelImplTest extends ViewModelTestBase {
 
     verify(librarian).deleteCollection(eq("x1"));
     verify(librarian, times(1)).deleteCollection("x1");
+  }
+
+  @Test
+  void globalUnitMode_propagatesFromNavigationService() {
+    assertThat(vm.getUnitSystem()).isEqualTo(UnitSystem.IMPERIAL);
+    navigation.setUnitSystem(UnitSystem.METRIC);
+    assertThat(vm.getUnitSystem()).isEqualTo(UnitSystem.METRIC);
   }
 }
