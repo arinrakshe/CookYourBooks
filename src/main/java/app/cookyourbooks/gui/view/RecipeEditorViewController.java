@@ -9,12 +9,16 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 
+import app.cookyourbooks.adapters.usda.NutritionInfo;
 import app.cookyourbooks.gui.NavigationService;
 import app.cookyourbooks.gui.viewmodel.EditableIngredient;
 import app.cookyourbooks.gui.viewmodel.RecipeEditorViewModel;
 import app.cookyourbooks.model.Unit;
+import app.cookyourbooks.services.nutrition.NutritionLookupService;
 
 /**
  * Controller for {@code RecipeEditorView.fxml}.
@@ -49,16 +53,22 @@ public class RecipeEditorViewController {
 
   private final RecipeEditorViewModel vm;
   private final NavigationService navigationService;
+  private final NutritionLookupService nutritionLookupService;
 
   /**
    * Constructs the controller with its required dependencies.
    *
    * @param vm the ViewModel for this feature
    * @param navigationService used to listen for recipe-selection navigation events
+   * @param nutritionLookupService used to fetch nutrition data for ingredients
    */
-  public RecipeEditorViewController(RecipeEditorViewModel vm, NavigationService navigationService) {
+  public RecipeEditorViewController(
+      RecipeEditorViewModel vm,
+      NavigationService navigationService,
+      NutritionLookupService nutritionLookupService) {
     this.vm = vm;
     this.navigationService = navigationService;
+    this.nutritionLookupService = nutritionLookupService;
   }
 
   // ── Initialization ───────────────────────────────────────────────────────
@@ -290,7 +300,8 @@ public class RecipeEditorViewController {
     private final TextField amountField = new TextField();
     private final ComboBox<String> unitCombo = new ComboBox<>();
     private final CheckBox vagueCheck = new CheckBox("Vague");
-    private final Button removeBtn = new Button("✕");
+    private final Button removeBtn = new Button("\u2715");
+    private final Button nutritionBtn = new Button("Nutrition");
     private final HBox editRow;
 
     // Stored listener references so they can be removed when the cell is rebound
@@ -309,9 +320,33 @@ public class RecipeEditorViewController {
         unitCombo.getItems().add(u.getAbbreviation());
       }
       removeBtn.setAccessibleText("Remove ingredient");
-      removeBtn.setTooltip(new javafx.scene.control.Tooltip("Remove ingredient"));
+      removeBtn.setTooltip(new Tooltip("Remove ingredient"));
       removeBtn.setOnAction(e -> vm.removeIngredient(getIndex()));
-      editRow = new HBox(8, nameField, amountField, unitCombo, vagueCheck, removeBtn);
+      nutritionBtn.setAccessibleText("Lookup nutrition");
+      nutritionBtn.setTooltip(new Tooltip("Lookup nutrition"));
+      nutritionBtn.setOnAction(
+          e -> {
+            String name = nameField.getText();
+            if (name == null || name.isBlank()) {
+              return;
+            }
+            double amount = 0;
+            try {
+              amount = Double.parseDouble(amountField.getText());
+            } catch (NumberFormatException ignored) {
+              // non-numeric or empty — adapter will return per-100g
+            }
+            String unit = unitCombo.getValue() != null ? unitCombo.getValue() : "";
+            try {
+              NutritionInfo info = nutritionLookupService.lookup(name, amount, unit);
+              showNutritionDialog(info, amount, unit);
+            } catch (app.cookyourbooks.services.nutrition.NutritionLookupException ex) {
+              new javafx.scene.control.Alert(
+                      javafx.scene.control.Alert.AlertType.ERROR, ex.getMessage())
+                  .showAndWait();
+            }
+          });
+      editRow = new HBox(8, nameField, amountField, unitCombo, vagueCheck, removeBtn, nutritionBtn);
       editRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
     }
 
@@ -348,6 +383,41 @@ public class RecipeEditorViewController {
                 : item.getAmount() + " " + item.getUnit() + " " + item.getName();
         setText(display.trim());
       }
+    }
+
+    /** Shows a popup dialog with the nutrition information. */
+    private void showNutritionDialog(NutritionInfo info, double amount, String unit) {
+      GridPane grid = new GridPane();
+      grid.setHgap(20);
+      grid.setVgap(6);
+      grid.setPadding(new javafx.geometry.Insets(10));
+
+      String header =
+          (amount > 0 && !unit.isBlank())
+              ? String.format("For %.1f %s:", amount, unit)
+              : "Per 100g:";
+      grid.add(new Label(header), 0, 0, 2, 1);
+      grid.add(new Label("Calories"), 0, 1);
+      grid.add(new Label(String.format("%.1f kcal", info.calories())), 1, 1);
+      grid.add(new Label("Protein"), 0, 2);
+      grid.add(new Label(String.format("%.1f g", info.protein())), 1, 2);
+      grid.add(new Label("Fat"), 0, 3);
+      grid.add(new Label(String.format("%.1f g", info.fat())), 1, 3);
+      grid.add(new Label("Carbs"), 0, 4);
+      grid.add(new Label(String.format("%.1f g", info.carbohydrates())), 1, 4);
+      grid.add(new Label("Fiber"), 0, 5);
+      grid.add(new Label(String.format("%.1f g", info.fiber())), 1, 5);
+
+      Label source = new Label("Source: USDA FoodData Central");
+      source.setStyle("-fx-font-style: italic; -fx-font-size: 10;");
+      grid.add(source, 0, 6, 2, 1);
+
+      javafx.scene.control.Alert dialog =
+          new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+      dialog.setTitle("Nutrition Info");
+      dialog.setHeaderText(info.description());
+      dialog.getDialogPane().setContent(grid);
+      dialog.showAndWait();
     }
 
     /** Removes all bindings and listeners from the currently bound item. */
