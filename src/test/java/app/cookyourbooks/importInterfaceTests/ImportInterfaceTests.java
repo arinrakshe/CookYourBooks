@@ -13,11 +13,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import app.cookyourbooks.gui.NavigationService;
 import app.cookyourbooks.gui.viewmodel.ImportViewModelImpl;
 import app.cookyourbooks.model.Ingredient;
 import app.cookyourbooks.model.Recipe;
 import app.cookyourbooks.model.RecipeCollection;
 import app.cookyourbooks.model.Servings;
+import app.cookyourbooks.model.UnitSystem;
 import app.cookyourbooks.model.VagueIngredient;
 import app.cookyourbooks.services.LibrarianService;
 import app.cookyourbooks.services.ocr.RecipeOcrService;
@@ -27,6 +29,7 @@ public class ImportInterfaceTests {
 
   private RecipeOcrService ocrService;
   private LibrarianService librarianService;
+  private NavigationService navigationService;
   private ImportViewModelImpl viewModel;
 
   @BeforeAll
@@ -41,7 +44,8 @@ public class ImportInterfaceTests {
   void setUp() {
     ocrService = mock(RecipeOcrService.class);
     librarianService = mock(LibrarianService.class);
-    viewModel = new ImportViewModelImpl(ocrService, librarianService);
+    navigationService = new NavigationService();
+    viewModel = new ImportViewModelImpl(ocrService, librarianService, navigationService);
   }
 
   // ===== I1: Initial state is idle; no imported recipe, no error =====
@@ -335,5 +339,12 @@ public class ImportInterfaceTests {
 
     assertEquals("idle", viewModel.currentStateProperty().get());
     verify(librarianService, never()).saveRecipe(any(), anyString());
+  }
+
+  @Test
+  void globalUnitMode_propagatesFromNavigationService() {
+    assertEquals(UnitSystem.IMPERIAL, viewModel.getUnitSystem());
+    navigationService.setUnitSystem(UnitSystem.METRIC);
+    assertEquals(UnitSystem.METRIC, viewModel.getUnitSystem());
   }
 }

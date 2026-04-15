@@ -6,12 +6,14 @@ import java.util.Map;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 
 import app.cookyourbooks.gui.NavigationService;
 import app.cookyourbooks.gui.NavigationService.View;
+import app.cookyourbooks.model.UnitSystem;
 
 /**
  * Controller for the main application layout ({@code MainView.fxml}).
@@ -38,6 +40,7 @@ public class MainViewController {
   @FXML private Button editorButton;
   @FXML private Button importButton;
   @FXML private Button searchButton;
+  @FXML private ComboBox<UnitSystem> unitSystemComboBox;
 
   private final NavigationService navigationService;
   private final Map<View, Node> viewNodes = new EnumMap<>(View.class);
@@ -72,6 +75,24 @@ public class MainViewController {
     editorButton.setOnAction(e -> navigationService.navigateTo(View.RECIPE_EDITOR));
     importButton.setOnAction(e -> navigationService.navigateTo(View.IMPORT));
     searchButton.setOnAction(e -> navigationService.navigateTo(View.SEARCH));
+    unitSystemComboBox.getItems().setAll(UnitSystem.IMPERIAL, UnitSystem.METRIC);
+    unitSystemComboBox.setValue(navigationService.getUnitSystem());
+    unitSystemComboBox
+        .valueProperty()
+        .addListener(
+            (obs, oldValue, newValue) -> {
+              if (newValue != null && newValue != navigationService.getUnitSystem()) {
+                navigationService.setUnitSystem(newValue);
+              }
+            });
+    navigationService
+        .unitSystemProperty()
+        .addListener(
+            (obs, oldValue, newValue) -> {
+              if (newValue != null && newValue != unitSystemComboBox.getValue()) {
+                unitSystemComboBox.setValue(newValue);
+              }
+            });
 
     // Add keyboard support: Enter/Space should activate buttons
     libraryButton.setOnKeyPressed(
