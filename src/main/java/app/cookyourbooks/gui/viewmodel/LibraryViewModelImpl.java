@@ -22,6 +22,7 @@ import app.cookyourbooks.gui.BackgroundTaskRunner;
 import app.cookyourbooks.gui.NavigationService;
 import app.cookyourbooks.model.Recipe;
 import app.cookyourbooks.model.RecipeCollection;
+import app.cookyourbooks.model.UnitSystem;
 import app.cookyourbooks.services.LibrarianService;
 
 /** Default implementation of {@link LibraryViewModel}. */
@@ -73,6 +74,7 @@ public final class LibraryViewModelImpl implements LibraryViewModel {
         });
 
     filterText.addListener((obs, o, n) -> rebuildFilteredCollections());
+    navigationService.unitSystemProperty().addListener((obs, oldValue, newValue) -> {});
   }
 
   @Override
@@ -292,5 +294,9 @@ public final class LibraryViewModelImpl implements LibraryViewModel {
 
   private void removeFromAllRows(String collectionId) {
     allRows = allRows.stream().filter(r -> !r.id().equals(collectionId)).toList();
+  }
+
+  public UnitSystem getUnitSystem() {
+    return navigationService.getUnitSystem();
   }
 }

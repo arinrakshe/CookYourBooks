@@ -24,6 +24,7 @@ import app.cookyourbooks.gui.BackgroundTaskRunner;
 import app.cookyourbooks.gui.NavigationService;
 import app.cookyourbooks.model.Recipe;
 import app.cookyourbooks.model.RecipeCollection;
+import app.cookyourbooks.model.UnitSystem;
 import app.cookyourbooks.services.LibrarianService;
 
 /**
@@ -60,6 +61,7 @@ public class SearchViewModelImpl implements SearchViewModel {
     this.librarianService = librarianService;
     this.navigationService = navigationService;
     debounce.setOnFinished(e -> runSearch());
+    navigationService.unitSystemProperty().addListener((obs, oldValue, newValue) -> {});
   }
 
   // ── Observable properties ─────────────────────────────────────────────────
@@ -261,5 +263,9 @@ public class SearchViewModelImpl implements SearchViewModel {
       output.add(new SearchResult(recipe.getId(), recipe.getTitle(), collectionTitle));
     }
     return output;
+  }
+
+  public UnitSystem getUnitSystem() {
+    return navigationService.getUnitSystem();
   }
 }

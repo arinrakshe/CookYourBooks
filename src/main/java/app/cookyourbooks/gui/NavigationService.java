@@ -7,6 +7,8 @@ import javafx.beans.property.StringProperty;
 
 import org.jspecify.annotations.Nullable;
 
+import app.cookyourbooks.model.UnitSystem;
+
 /**
  * Shared navigation state for the CookYourBooks GUI.
  *
@@ -41,6 +43,8 @@ public class NavigationService {
 
   private final ObjectProperty<View> currentView = new SimpleObjectProperty<>(View.LIBRARY);
   private final StringProperty selectedRecipeId = new SimpleStringProperty();
+  private final ObjectProperty<UnitSystem> unitSystem =
+      new SimpleObjectProperty<>(UnitSystem.IMPERIAL);
 
   /**
    * Navigates to the specified view.
@@ -79,5 +83,20 @@ public class NavigationService {
   /** Returns the currently selected recipe ID, or null if none. */
   public @Nullable String getSelectedRecipeId() {
     return selectedRecipeId.get();
+  }
+
+  /** Returns the shared unit-system property (for binding/listening across feature ViewModels). */
+  public ObjectProperty<UnitSystem> unitSystemProperty() {
+    return unitSystem;
+  }
+
+  /** Returns the current app-wide unit system. */
+  public UnitSystem getUnitSystem() {
+    return unitSystem.get();
+  }
+
+  /** Sets the current app-wide unit system. */
+  public void setUnitSystem(UnitSystem unitSystem) {
+    this.unitSystem.set(unitSystem);
   }
 }

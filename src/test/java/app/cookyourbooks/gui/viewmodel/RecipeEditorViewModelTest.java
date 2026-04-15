@@ -3,21 +3,29 @@ package app.cookyourbooks.gui.viewmodel;
 import static app.cookyourbooks.cli.fixtures.TestRecipeBuilder.recipe;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import app.cookyourbooks.conversion.ConversionRegistry;
+import app.cookyourbooks.conversion.ConversionRule;
+import app.cookyourbooks.gui.NavigationService;
 import app.cookyourbooks.gui.ViewModelTestBase;
+import app.cookyourbooks.model.Quantity;
 import app.cookyourbooks.model.Recipe;
 import app.cookyourbooks.model.Unit;
+import app.cookyourbooks.model.UnitSystem;
+import app.cookyourbooks.model.VagueIngredient;
 import app.cookyourbooks.repository.RecipeRepository;
 import app.cookyourbooks.repository.RepositoryException;
 
@@ -32,6 +40,8 @@ import app.cookyourbooks.repository.RepositoryException;
 class RecipeEditorViewModelTest extends ViewModelTestBase {
 
   private RecipeRepository mockRepo;
+  private NavigationService navigationService;
+  private ConversionRegistry conversionRegistry;
   private RecipeEditorViewModelImpl vm;
 
   // A reusable test recipe with two measured ingredients
@@ -54,7 +64,9 @@ class RecipeEditorViewModelTest extends ViewModelTestBase {
   @BeforeEach
   void setUp() {
     mockRepo = mock(RecipeRepository.class);
-    vm = new RecipeEditorViewModelImpl(mockRepo);
+    navigationService = new NavigationService();
+    conversionRegistry = mock(ConversionRegistry.class);
+    vm = new RecipeEditorViewModelImpl(mockRepo, navigationService, () -> conversionRegistry);
     testRecipe =
         recipe("Pasta Carbonara")
             .withIngredient("flour", 2.0, Unit.CUP)
@@ -330,6 +342,7 @@ class RecipeEditorViewModelTest extends ViewModelTestBase {
     waitForFxEvents();
 
     verify(mockRepo, never()).save(any());
+    assertThat(vm.getStatusMessage()).isEqualTo("No changes to save.");
   }
 
   @Test
@@ -342,5 +355,100 @@ class RecipeEditorViewModelTest extends ViewModelTestBase {
     waitForFxEvents();
 
     verify(mockRepo, never()).save(any());
+    assertThat(vm.getStatusMessage()).isEqualTo("Title cannot be blank.");
+  }
+
+  @Test
+  void unitToggle_whenClean_convertsMeasuredIngredients() throws Exception {
+    vm.loadRecipe(testRecipe.getId());
+    when(conversionRegistry.findConversionToSystem(Unit.CUP, UnitSystem.METRIC))
+        .thenReturn(Optional.of(new ConversionRule(Unit.CUP, Unit.MILLILITER, 236.588, null)));
+    when(conversionRegistry.findConversionToSystem(Unit.TEASPOON, UnitSystem.METRIC))
+        .thenReturn(Optional.of(new ConversionRule(Unit.TEASPOON, Unit.MILLILITER, 4.928, null)));
+    when(conversionRegistry.convert(any(Quantity.class), any(Unit.class), anyString()))
+        .thenAnswer(
+            invocation -> {
+              Quantity source = invocation.getArgument(0);
+              Unit target = invocation.getArgument(1);
+              return source.withScalingFactor(2.0, target);
+            });
+
+    navigationService.setUnitSystem(UnitSystem.METRIC);
+
+    assertThat(vm.ingredientsProperty().get(0).getUnit())
+        .isEqualTo(Unit.MILLILITER.getAbbreviation());
+    assertThat(vm.ingredientsProperty().get(0).getAmount()).isEqualTo("4");
+    assertThat(vm.isDirty()).isFalse();
+  }
+
+  @Test
+  void unitToggle_whenDirty_revertsAndShowsMessage() {
+    vm.loadRecipe(testRecipe.getId());
+    vm.toggleEditMode();
+    vm.titleProperty().set("Edited");
+    assertThat(vm.isDirty()).isTrue();
+
+    navigationService.setUnitSystem(UnitSystem.METRIC);
+
+    assertThat(navigationService.getUnitSystem()).isEqualTo(UnitSystem.IMPERIAL);
+    assertThat(vm.getStatusMessage())
+        .isEqualTo("Save or discard edits before changing unit system.");
+  }
+
+  @Test
+  void loadRecipe_appliesCurrentGlobalUnitSystem() throws Exception {
+    navigationService.setUnitSystem(UnitSystem.METRIC);
+    when(conversionRegistry.findConversionToSystem(Unit.CUP, UnitSystem.METRIC))
+        .thenReturn(Optional.of(new ConversionRule(Unit.CUP, Unit.MILLILITER, 236.588, null)));
+    when(conversionRegistry.findConversionToSystem(Unit.TEASPOON, UnitSystem.METRIC))
+        .thenReturn(Optional.of(new ConversionRule(Unit.TEASPOON, Unit.MILLILITER, 4.928, null)));
+    when(conversionRegistry.convert(any(Quantity.class), any(Unit.class), anyString()))
+        .thenAnswer(
+            invocation -> {
+              Quantity source = invocation.getArgument(0);
+              Unit target = invocation.getArgument(1);
+              return source.withScalingFactor(2.0, target);
+            });
+
+    vm.loadRecipe(testRecipe.getId());
+
+    assertThat(vm.ingredientsProperty().get(0).getUnit())
+        .isEqualTo(Unit.MILLILITER.getAbbreviation());
+    assertThat(vm.ingredientsProperty().get(0).getAmount()).isEqualTo("4");
+    assertThat(vm.isDirty()).isFalse();
+  }
+
+  @Test
+  void unitToggle_whenNoMeasurableIngredients_showsHint() {
+    Recipe vagueOnlyRecipe =
+        new Recipe(
+            "vague-only",
+            "Salt To Taste",
+            null,
+            List.of(new VagueIngredient("salt", null, null, null)),
+            List.of(),
+            List.of());
+    when(mockRepo.findById(vagueOnlyRecipe.getId())).thenReturn(Optional.of(vagueOnlyRecipe));
+    vm.loadRecipe(vagueOnlyRecipe.getId());
+
+    navigationService.setUnitSystem(UnitSystem.METRIC);
+
+    assertThat(vm.getStatusMessage()).isEqualTo("No measurable ingredients to convert.");
+  }
+
+  @Test
+  void unitToggle_whenConversionUnsupported_keepsIngredientUnchanged() {
+    vm.loadRecipe(testRecipe.getId());
+    when(conversionRegistry.findConversionToSystem(Unit.CUP, UnitSystem.METRIC))
+        .thenReturn(Optional.empty());
+    when(conversionRegistry.findConversionToSystem(Unit.TEASPOON, UnitSystem.METRIC))
+        .thenReturn(Optional.empty());
+
+    String beforeAmount = vm.ingredientsProperty().get(0).getAmount();
+    String beforeUnit = vm.ingredientsProperty().get(0).getUnit();
+    navigationService.setUnitSystem(UnitSystem.METRIC);
+
+    assertThat(vm.ingredientsProperty().get(0).getAmount()).isEqualTo(beforeAmount);
+    assertThat(vm.ingredientsProperty().get(0).getUnit()).isEqualTo(beforeUnit);
   }
 }

@@ -111,12 +111,14 @@ public class CookYourBooksGuiApp extends Application {
     }
 
     // ── Wire Recipe Editor ──
-    var recipeEditorVm = new RecipeEditorViewModelImpl(library.getRecipeRepository());
     String usdaKey = System.getenv("USDA_API_KEY");
     if (usdaKey == null || usdaKey.isBlank()) {
       usdaKey = "DEMO_KEY";
     }
     var nutritionService = new NutritionLookupAdapter(new RealUsdaClient(usdaKey));
+    var recipeEditorVm =
+        new RecipeEditorViewModelImpl(
+            library.getRecipeRepository(), navigationService, library::getConversionRegistry);
     FXMLLoader editorLoader = new FXMLLoader(getClass().getResource("/fxml/RecipeEditorView.fxml"));
     editorLoader.setController(
         new RecipeEditorViewController(recipeEditorVm, navigationService, nutritionService));
@@ -130,7 +132,8 @@ public class CookYourBooksGuiApp extends Application {
     // Wire Import Interface
     try {
       RecipeOcrService ocrService = new LocalFakeRecipeOcrService();
-      ImportViewModelImpl importVm = new ImportViewModelImpl(ocrService, librarianService);
+      ImportViewModelImpl importVm =
+          new ImportViewModelImpl(ocrService, librarianService, navigationService);
 
       FXMLLoader importLoader = new FXMLLoader(getClass().getResource("/fxml/ImportView.fxml"));
       Parent importView = importLoader.load();

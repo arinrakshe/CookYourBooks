@@ -209,6 +209,9 @@ public class RecipeEditorViewController {
     // When edit mode toggles, force all cells to re-render (updateItem is only called on data
     // changes by default, so we need refresh() to pick up the mode switch)
     vm.editingProperty().addListener((obs, oldVal, newVal) -> ingredientListView.refresh());
+    navigationService
+        .unitSystemProperty()
+        .addListener((obs, oldVal, newVal) -> ingredientListView.refresh());
   }
 
   /**
