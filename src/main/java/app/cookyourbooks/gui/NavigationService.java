@@ -1,6 +1,8 @@
 package app.cookyourbooks.gui;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -45,6 +47,7 @@ public class NavigationService {
   private final StringProperty selectedRecipeId = new SimpleStringProperty();
   private final ObjectProperty<UnitSystem> unitSystem =
       new SimpleObjectProperty<>(UnitSystem.IMPERIAL);
+  private final BooleanProperty darkMode = new SimpleBooleanProperty(false);
 
   /**
    * Navigates to the specified view.
@@ -98,5 +101,20 @@ public class NavigationService {
   /** Sets the current app-wide unit system. */
   public void setUnitSystem(UnitSystem unitSystem) {
     this.unitSystem.set(unitSystem);
+  }
+
+  /** Returns the dark mode property (for binding/listening). */
+  public BooleanProperty darkModeProperty() {
+    return darkMode;
+  }
+
+  /** Returns whether dark mode is currently enabled. */
+  public boolean isDarkMode() {
+    return darkMode.get();
+  }
+
+  /** Sets dark mode on or off. */
+  public void setDarkMode(boolean enabled) {
+    darkMode.set(enabled);
   }
 }

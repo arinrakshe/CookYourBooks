@@ -4,7 +4,9 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
@@ -34,6 +36,9 @@
             <Button fx:id="searchButton" text="Search" styleClass="nav-button" maxWidth="Infinity"/>
             <Label text="Units" styleClass="sidebar-title"/>
             <ComboBox fx:id="unitSystemComboBox" maxWidth="Infinity"/>
+
+            <Region VBox.vgrow="ALWAYS"/>
+            <ToggleButton fx:id="darkModeToggle" text="Dark Mode" maxWidth="Infinity" styleClass="nav-button"/>
         </VBox>
     </left>
 

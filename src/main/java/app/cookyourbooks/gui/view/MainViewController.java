@@ -5,9 +5,11 @@ import java.util.Map;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 
@@ -41,6 +43,7 @@ public class MainViewController {
   @FXML private Button importButton;
   @FXML private Button searchButton;
   @FXML private ComboBox<UnitSystem> unitSystemComboBox;
+  @FXML private ToggleButton darkModeToggle;
 
   private final NavigationService navigationService;
   private final Map<View, Node> viewNodes = new EnumMap<>(View.class);
@@ -124,6 +127,16 @@ public class MainViewController {
           }
         });
 
+    // Wire dark mode toggle
+    darkModeToggle.setSelected(navigationService.isDarkMode());
+    darkModeToggle
+        .selectedProperty()
+        .addListener(
+            (obs, wasSelected, isSelected) -> {
+              navigationService.setDarkMode(isSelected);
+              applyTheme(isSelected);
+            });
+
     // Listen for navigation changes and swap the content area
     navigationService
         .currentViewProperty()
@@ -131,6 +144,36 @@ public class MainViewController {
 
     // Show the initial view
     showView(navigationService.getCurrentView());
+  }
+
+  private void applyTheme(boolean dark) {
+    String darkCss = getClass().getResource("/css/dark.css").toExternalForm();
+
+    // Each FXML file loads cookyourbooks.css at node level, which outranks scene-level
+    // stylesheets. So we must add dark.css to every node that carries its own stylesheet list:
+    // 1. The scene root (BorderPane from MainView.fxml) — covers content-area, sidebar
+    // 2. Each feature view node (HBox/VBox roots from LibraryView.fxml, etc.)
+    // 3. The scene itself, as a fallback for any remaining nodes
+    addOrRemove(contentArea.getScene().getRoot().getStylesheets(), darkCss, dark);
+    for (Node node : viewNodes.values()) {
+      if (node instanceof Parent parent) {
+        addOrRemove(parent.getStylesheets(), darkCss, dark);
+      }
+    }
+    addOrRemove(contentArea.getScene().getStylesheets(), darkCss, dark);
+
+    darkModeToggle.setText(dark ? "Light Mode" : "Dark Mode");
+  }
+
+  private static void addOrRemove(
+      javafx.collections.ObservableList<String> list, String item, boolean add) {
+    if (add) {
+      if (!list.contains(item)) {
+        list.add(item);
+      }
+    } else {
+      list.remove(item);
+    }
   }
 
   private void showView(View view) {
