@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import app.cookyourbooks.CybLibrary;
+import app.cookyourbooks.adapters.NutritionLookupAdapter;
+import app.cookyourbooks.adapters.usda.RealUsdaClient;
 import app.cookyourbooks.gui.controller.ImportController;
 import app.cookyourbooks.gui.view.LibraryViewController;
 import app.cookyourbooks.gui.view.MainViewController;
@@ -109,11 +111,17 @@ public class CookYourBooksGuiApp extends Application {
     }
 
     // ── Wire Recipe Editor ──
+    String usdaKey = System.getenv("USDA_API_KEY");
+    if (usdaKey == null || usdaKey.isBlank()) {
+      usdaKey = "DEMO_KEY";
+    }
+    var nutritionService = new NutritionLookupAdapter(new RealUsdaClient(usdaKey));
     var recipeEditorVm =
         new RecipeEditorViewModelImpl(
             library.getRecipeRepository(), navigationService, library::getConversionRegistry);
     FXMLLoader editorLoader = new FXMLLoader(getClass().getResource("/fxml/RecipeEditorView.fxml"));
-    editorLoader.setController(new RecipeEditorViewController(recipeEditorVm, navigationService));
+    editorLoader.setController(
+        new RecipeEditorViewController(recipeEditorVm, navigationService, nutritionService));
     try {
       Parent editorView = editorLoader.load();
       mainController.setViewNode(NavigationService.View.RECIPE_EDITOR, editorView);
