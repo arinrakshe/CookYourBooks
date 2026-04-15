@@ -1,0 +1,220 @@
+/* Dark theme overrides for CookYourBooks. */
+
+/* ── Root ── */
+.root-pane {
+    -fx-background-color: #111111;
+}
+
+/* ── Content area ── */
+.content-area {
+    -fx-background-color: #1c1c1c;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 8, 0, 0, 2);
+}
+
+/* ── Sidebar ── */
+.sidebar {
+    -fx-background-color: #1a1a1a;
+}
+
+/* ── Text ── */
+.section-title {
+    -fx-text-fill: #e0e0e0;
+}
+
+.status-label {
+    -fx-text-fill: #a0a0a0;
+}
+
+.label {
+    -fx-text-fill: #e0e0e0;
+}
+
+/* ── Controls ── */
+.text-field, .text-area, .combo-box {
+    -fx-background-color: #2a2a2a;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #555555;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.text-area .content {
+    -fx-background-color: #2a2a2a;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: #e0e0e0;
+    -fx-background-color: #2a2a2a;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #2a2a2a;
+    -fx-border-color: #555555;
+}
+
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #3a3a3a;
+}
+
+/* ── Buttons ── */
+.button {
+    -fx-background-color: #3a3a3a;
+    -fx-text-fill: #e0e0e0;
+    -fx-background-radius: 4;
+}
+
+.button:hover {
+    -fx-background-color: #505050;
+}
+
+.nav-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #aaaaaa;
+}
+
+.nav-button:hover {
+    -fx-background-color: #2a2a2a;
+    -fx-text-fill: white;
+}
+
+.nav-button.nav-active {
+    -fx-background-color: #9b59b6;
+    -fx-text-fill: white;
+}
+
+/* ── Library collection cards ── */
+.library-collection-scroll {
+    -fx-background-color: #1c1c1c;
+    -fx-border-color: #444444;
+    -fx-background-radius: 12;
+}
+
+.library-collection-scroll .viewport {
+    -fx-background-color: #1c1c1c;
+    -fx-background: #1c1c1c;
+}
+
+.library-collection-grid {
+    -fx-background-color: #1c1c1c;
+}
+
+.library-collection-card {
+    -fx-background-color: #2a2a2a;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.5), 10, 0, 0, 2);
+}
+
+.library-collection-card:hover {
+    -fx-effect: dropshadow(gaussian, rgba(150,100,255,0.4), 14, 0, 0, 3);
+}
+
+.library-collection-empty {
+    -fx-text-fill: #a0a0a0;
+}
+
+.library-card-title {
+    -fx-text-fill: #e0e0e0;
+}
+
+.library-card-meta {
+    -fx-text-fill: #a0a0a0;
+}
+
+/* ── All scroll panes (fallback for any view) ── */
+.scroll-pane {
+    -fx-background-color: #242424;
+}
+
+.scroll-pane .viewport {
+    -fx-background-color: #242424;
+    -fx-background: #242424;
+}
+
+/* ── Recipe Editor ── */
+.recipe-editor {
+    -fx-background-color: #1c1c1c;
+}
+
+.editor-header {
+    -fx-background-color: #1c1c1c;
+}
+
+.editor-scroll {
+    -fx-background-color: #242424;
+    -fx-border-color: #444444;
+}
+
+.editor-scroll .viewport {
+    -fx-background-color: #242424;
+    -fx-background: #242424;
+}
+
+.section-header {
+    -fx-text-fill: #cccccc;
+    -fx-font-size: 13;
+    -fx-font-weight: bold;
+}
+
+.recipe-title {
+    -fx-text-fill: #e0e0e0;
+}
+
+.title-field {
+    -fx-background-color: #2a2a2a;
+    -fx-text-fill: #e0e0e0;
+    -fx-border-color: #555555;
+    -fx-border-radius: 4;
+    -fx-background-radius: 4;
+}
+
+.action-button {
+    -fx-background-color: #3a3a3a;
+    -fx-text-fill: #e0e0e0;
+    -fx-background-radius: 6;
+}
+
+.action-button:hover {
+    -fx-background-color: #505050;
+}
+
+.action-button-primary {
+    -fx-background-color: #9b59b6;
+    -fx-text-fill: white;
+    -fx-background-radius: 6;
+}
+
+.action-button-primary:hover {
+    -fx-background-color: #8e44ad;
+}
+
+.small-button {
+    -fx-background-color: #3a3a3a;
+    -fx-text-fill: #e0e0e0;
+    -fx-background-radius: 4;
+}
+
+/* ── Table/List views ── */
+.table-view, .list-view {
+    -fx-background-color: #1c1c1c;
+    -fx-border-color: #444444;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #2a2a2a;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #e0e0e0;
+}
+
+.table-row-cell, .list-cell {
+    -fx-background-color: #1c1c1c;
+    -fx-text-fill: #e0e0e0;
+}
+
+.table-row-cell:odd, .list-cell:odd {
+    -fx-background-color: #242424;
+}
+
+.table-row-cell:selected, .list-cell:selected {
+    -fx-background-color: #9b59b6;
+}
