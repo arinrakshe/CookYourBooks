@@ -12,7 +12,7 @@ Why did we choose this feature + what user need  does it address: We chose this 
 Alternatives we considered: We considered changing the general layout color to something less bright, more universal, but it doesn't look optimal, and ultimately a capability to switch between two versions is better than having a middle-ground version.
 
 
-2. Design Artifacts (actually I'll rewrite entire answer, that's my part)
+2. Design Artifacts
 Show your design evolution:
 
 Version 1: Initial wireframe/mockup
@@ -22,10 +22,17 @@ Photos of whiteboard sketches are fine. The goal is showing iteration, not polis
 
 TODO: [Insert pictures]
 
-We first didn't think much about button cosmetic, since we focused first on implementing functionality. During functionality, we played with some different colors until choosing final version. 
+We first didn't think much about button cosmetic, since we focused first on implementing functionality. During functionality, we played with some different colors until choosing final version. We didn't sketch the colors because obviously it is easier to play with colors in the code, rather than imagine how it looks like on whiteboard.
 
-Regarding the button/slider, first iteration was just a clikable text. We implemented it first just to have a capability to switch between the two modes, but we knew this isn't perfect, and we would change it later. On our first iteration, it didn't seem like it's an interactive text to the user, so we then made a sliding button. During the making of it, we tried to have a text within a button, but it looked ugly. We still knew that a button can't be completely empty, it has to contain something that a user immediately understand what the button does. We decided to use an icon of a sun and a moon, we believe this is pretty intuitive to the user, and also looks nice and compact.
+Regarding the button/slider, zeroth iteration was just a clickable text. We implemented it first just to have a capability to test functionality of dark mode, to have an ability to switch between the two modes. We did that for internal development usage only, we knew this is not what we will let a user use.
 
+After completing functionality and testing it works, we decided to try sketching a button and improve our sketch with each iterating.
+
+First version: we tried having a button that says "lightmode" when in lightmode, and  "darkmode" when clicked and switched to darkmode. We think the text was offsetting a little. It didn't feel natural, and we think it wasn't too obvious for the user what the button does. It didn't seem right.
+
+Second version: we then decided to try and do a slider. This now makes it obvious that this is an interactive button, and it changes from one state to another, like a binary operation. It should also be less scary since users know that they can return to the original state by clicking the slider again. Obviously, a slider either goes right or left only. It is not some obscure button that maybe is going to ask a user to potentially do something else. It is a simpler design that implies simpler change in state in a binary format, easy to return to original state if the result of the sliding button doesn't satisfy a user. We thought of retaining texts, "lightmode" when in lightmode, "darkmode" when in darkmode. When sketching it, we realized the text still looks ugly and you need to fit it in a relatively small button, so we needed to further improve our design. Not putting anything inside the slider is way too obscure, so that wouldn't work either.
+
+Third, final version: For the final sketch we decided to use a sun and a moon to communicate with the user. Both sun and moon appear on the button, and it's obvious which one is selected right now. This is a very simple design, compact, not scary, and very self-explanatory.
 
 3. Implementation Journal
 Document your implementation process:
@@ -34,11 +41,13 @@ Git history: Show incremental progress (not one giant commit at the end)
 PR history: Link to PRs with meaningful review comments
 Decision log: At least one documented technical decision with alternatives considered
 
-Git history: we made sure we take incremental steps in the implementation of the featuer.
+Git history: we made sure we take incremental steps in the implementation of the feature.
 
 TODO: PR history: (provide link(s) to PRs with meaningful review comments)
 
-TODO: Decision log: (At least one documented technical decision with alternatives considered)
+Decision log: A key technical decision was how to implement the dark mode sliding button. One option was to use a standard JavaFX ToggleButton styled purely with CSS, but this limited the ability to create a smooth sliding animation and nice appearance.
+Another option was to build a custom control button, which would provide maximum flexibility but require significantly more code and complexity.
+The chosen approach was to use a ToggleButton with a custom graphic composed of a track, thumb, and icons, and animate the thumb using JavaFX transitions. That gave us good balance between flexibility and complexity.
 
 4. Testing & Quality
 TODO: Unit tests for the feature
