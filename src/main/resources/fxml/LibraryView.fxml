@@ -20,8 +20,9 @@
             <TextField fx:id="filterField" promptText="Filter by title…" prefWidth="220" HBox.hgrow="SOMETIMES"/>
             <ProgressIndicator fx:id="loadingIndicator" maxHeight="24" maxWidth="24"/>
         </HBox>
-        <ScrollPane fx:id="collectionScroll" styleClass="library-collection-scroll" fitToWidth="true"
-                    hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
+        <ScrollPane fx:id="collectionScroll" styleClass="library-collection-scroll"
+            fitToWidth="true" fitToHeight="true"
+            hbarPolicy="NEVER" VBox.vgrow="ALWAYS">
             <FlowPane fx:id="collectionCardGrid" styleClass="library-collection-grid"/>
         </ScrollPane>
         <HBox spacing="8">

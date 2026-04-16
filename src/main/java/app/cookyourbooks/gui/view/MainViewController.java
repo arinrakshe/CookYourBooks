@@ -3,15 +3,20 @@ package app.cookyourbooks.gui.view;
 import java.util.EnumMap;
 import java.util.Map;
 
+import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.util.Duration;
 
 import app.cookyourbooks.gui.NavigationService;
 import app.cookyourbooks.gui.NavigationService.View;
@@ -47,6 +52,11 @@ public class MainViewController {
 
   private final NavigationService navigationService;
   private final Map<View, Node> viewNodes = new EnumMap<>(View.class);
+
+  private StackPane darkModeSwitchGraphic;
+  private StackPane darkModeSwitchThumb;
+  private Label darkModeThumbIcon;
+  private Label darkModeTrackIcon;
 
   /**
    * Constructs the main view controller.
@@ -127,14 +137,19 @@ public class MainViewController {
           }
         });
 
+    buildDarkModeSwitchGraphic();
+
     // Wire dark mode toggle
     darkModeToggle.setSelected(navigationService.isDarkMode());
+    updateDarkModeSwitchPosition(navigationService.isDarkMode(), false);
+
     darkModeToggle
         .selectedProperty()
         .addListener(
             (obs, wasSelected, isSelected) -> {
               navigationService.setDarkMode(isSelected);
               applyTheme(isSelected);
+              updateDarkModeSwitchPosition(isSelected, true);
             });
 
     // Listen for navigation changes and swap the content area
@@ -144,6 +159,64 @@ public class MainViewController {
 
     // Show the initial view
     showView(navigationService.getCurrentView());
+  }
+
+  private void buildDarkModeSwitchGraphic() {
+    Region track = new Region();
+    track.getStyleClass().add("theme-switch-track");
+
+    darkModeTrackIcon = new Label();
+    darkModeTrackIcon.getStyleClass().addAll("theme-switch-icon", "theme-switch-track-icon");
+    darkModeTrackIcon.setMouseTransparent(true);
+
+    darkModeSwitchThumb = new StackPane();
+    darkModeSwitchThumb.getStyleClass().add("theme-switch-thumb");
+    darkModeSwitchThumb.setMouseTransparent(true);
+
+    darkModeThumbIcon = new Label();
+    darkModeThumbIcon.getStyleClass().addAll("theme-switch-icon", "theme-switch-thumb-icon");
+    darkModeThumbIcon.setMouseTransparent(true);
+
+    darkModeSwitchThumb.getChildren().add(darkModeThumbIcon);
+
+    darkModeSwitchGraphic = new StackPane(track, darkModeTrackIcon, darkModeSwitchThumb);
+    darkModeSwitchGraphic.getStyleClass().add("theme-switch-graphic");
+
+    StackPane.setAlignment(darkModeTrackIcon, Pos.CENTER);
+    StackPane.setAlignment(darkModeSwitchThumb, Pos.CENTER);
+
+    darkModeToggle.setText("");
+    darkModeToggle.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+    darkModeToggle.setAlignment(Pos.CENTER);
+    darkModeToggle.setGraphic(darkModeSwitchGraphic);
+  }
+
+  private void updateDarkModeSwitchPosition(boolean selected, boolean animate) {
+    if (darkModeSwitchThumb == null) {
+      return;
+    }
+
+    double thumbX = selected ? 18 : -18;
+    double trackIconX = selected ? -18 : 18;
+
+    if (animate) {
+      TranslateTransition transition =
+          new TranslateTransition(Duration.millis(160), darkModeSwitchThumb);
+      transition.setToX(thumbX);
+      transition.play();
+    } else {
+      darkModeSwitchThumb.setTranslateX(thumbX);
+    }
+
+    darkModeTrackIcon.setTranslateX(trackIconX);
+
+    if (selected) {
+      darkModeThumbIcon.setText("☾");
+      darkModeTrackIcon.setText("☀");
+    } else {
+      darkModeThumbIcon.setText("☀");
+      darkModeTrackIcon.setText("☾");
+    }
   }
 
   private void applyTheme(boolean dark) {
@@ -161,8 +234,6 @@ public class MainViewController {
       }
     }
     addOrRemove(contentArea.getScene().getStylesheets(), darkCss, dark);
-
-    darkModeToggle.setText(dark ? "Light Mode" : "Dark Mode");
   }
 
   private static void addOrRemove(
