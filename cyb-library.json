@@ -31,9 +31,13 @@
       "title" : "Quick Garden Salad",
       "servings" : null,
       "ingredients" : [ {
-        "type" : "vague",
+        "type" : "measured",
         "name" : "mixed greens",
-        "description" : null,
+        "quantity" : {
+          "type" : "exact",
+          "amount" : 1.0,
+          "unit" : "POUND"
+        },
         "preparation" : null,
         "notes" : null
       } ],
@@ -90,6 +94,14 @@
     "type" : "personal",
     "id" : "0e3b92cc-5b0d-4b93-a95a-290bb2de547f",
     "title" : "Saved from the Web (demo — empty)",
+    "recipes" : [ ],
+    "description" : null,
+    "notes" : null,
+    "sourceType" : "PERSONAL"
+  }, {
+    "type" : "personal",
+    "id" : "8d50416e-6f7e-4119-b7f3-5f07c3d28ee2",
+    "title" : "mfksdvxz",
     "recipes" : [ ],
     "description" : null,
     "notes" : null,

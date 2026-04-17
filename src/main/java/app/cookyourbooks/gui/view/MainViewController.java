@@ -137,6 +137,15 @@ public class MainViewController {
           }
         });
 
+    darkModeToggle.setFocusTraversable(true);
+    darkModeToggle.setOnKeyPressed(
+        event -> {
+          if (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE) {
+            darkModeToggle.fire();
+            event.consume();
+          }
+        });
+
     buildDarkModeSwitchGraphic();
 
     // Wire dark mode toggle

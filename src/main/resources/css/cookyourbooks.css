@@ -109,6 +109,39 @@
     -fx-font-weight: bold;
 }
 
+/* ── Keyboard focus visibility ── */
+.nav-button:focused,
+.combo-box:focused {
+    -fx-border-color: #ffd54f;
+    -fx-border-width: 2;
+    -fx-border-radius: 8;
+    -fx-background-insets: 0;
+}
+
+.nav-button:focused {
+    -fx-background-color: #455a64;
+    -fx-text-fill: white;
+}
+
+.nav-button.nav-active:focused {
+    -fx-background-color: #b96ad8;
+    -fx-text-fill: white;
+    -fx-border-color: #ffd54f;
+}
+
+.theme-switch:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 8 0 0 0;
+}
+
+.theme-switch:focused .theme-switch-track {
+    -fx-border-color: #ffd54f;
+    -fx-border-width: 3;
+    -fx-border-radius: 22;
+}
+
 /* ── Content area ── */
 .content-area {
     -fx-background-color: white;

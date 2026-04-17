@@ -99,6 +99,46 @@
     -fx-text-fill: white;
 }
 
+/* ── Keyboard focus visibility ── */
+.nav-button:focused,
+.combo-box:focused {
+    -fx-border-color: #ffd54f;
+    -fx-border-width: 2;
+}
+
+.theme-switch:focused {
+    -fx-border-color: transparent;
+}
+
+.nav-button:focused {
+    -fx-background-color: #333333;
+    -fx-text-fill: white;
+}
+
+.nav-button.nav-active:focused {
+    -fx-background-color: #b96ad8;
+    -fx-text-fill: white;
+    -fx-border-color: #ffd54f;
+}
+
+.theme-switch:focused .theme-switch-track {
+    -fx-border-color: #ffd54f;
+    -fx-border-width: 3;
+    -fx-border-radius: 22;
+}
+
+/* ── Keyboard focus visibility for regular buttons ── */
+.button:focused {
+    -fx-border-color: #ffd54f;
+    -fx-border-width: 2;
+    -fx-border-radius: 8;
+    -fx-background-insets: 0;
+}
+
+.button:focused {
+    -fx-effect: dropshadow(gaussian, rgba(255, 213, 79, 0.45), 10, 0.25, 0, 0);
+}
+
 /* ── Library collection cards ── */
 .library-collection-scroll {
     -fx-background-color: #1c1c1c;
