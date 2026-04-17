@@ -1,26 +1,12 @@
 1. Design Rationale
-Document (1/2 page):
-
-Why did you choose this feature?
-What user need does it address? (Reference a persona from GA0)
-What alternatives did you consider?
-
 User persona from GA0: Taylor Rodriguez, a college student who is renting her appartment and doesn't have constant access to school cafeteria. She wants to learn to cook moderately advanced dishes because in her culture cooking is valuable and she wants to learn to cook without going to culinary classes. She is capable to take a picture of a prepared dish and upload it anywhere. She is also capable to find a picture online, copy (or even save) and paste it wherever needed. Her goal is to broaden her standard cooking skills and learn to multitask and cook multiple different dishes at a time. Right now she is only able to cook simple dishes like eggs, grilled chicken with mashed potatoes, pasta marinara, or dishes that do not have multiple ingredients (like japanese rolls, beef wellington, or soups like borscht). She struggles with timings if she needs to prepare and interact with multiple ingredients at a time, and she also doesn't "feel" how much of each spices needs to be added, she must follow exact instructions or else gets lost or may add wrong quantity. She would always cook in her kitchen where she controls what she has, where everything is located, and how her stove works.
 
 Why did we choose this feature + what user need  does it address: We chose this feature because students often stay late, on their phones, and we, as a college students who can relate to Taylor Rodriguez, definitely use and appreciate darkmode in pretty much any application. I, Konstantin, even downloaded an app that lowers my screen brightness below what I can do myself in settings. That feature helps avoid eye-damage for late night usage, but also some users prefer a darker layout, so this is also a cosmetic capability.
 
 Alternatives we considered: We considered changing the general layout color to something less bright, more universal, but it doesn't look optimal, and ultimately a capability to switch between two versions is better than having a middle-ground version.
 
-
 2. Design Artifacts
-Show your design evolution:
-
-Version 1: Initial wireframe/mockup
-Version 2+: At least one iteration with documented changes
-Rationale: Why did you change the design? What feedback prompted it?
-Photos of whiteboard sketches are fine. The goal is showing iteration, not polish.
-
-TODO: [Insert pictures]
+![Evolution](screenshots/evolution.jpg)
 
 We first didn't think much about button cosmetic, since we focused first on implementing functionality. During functionality, we played with some different colors until choosing final version. We didn't sketch the colors because obviously it is easier to play with colors in the code, rather than imagine how it looks like on whiteboard.
 
@@ -35,31 +21,23 @@ Second version: we then decided to try and do a slider. This now makes it obviou
 Third, final version: For the final sketch we decided to use a sun and a moon to communicate with the user. Both sun and moon appear on the button, and it's obvious which one is selected right now. This is a very simple design, compact, not scary, and very self-explanatory.
 
 3. Implementation Journal
-Document your implementation process:
-
-Git history: Show incremental progress (not one giant commit at the end)
-PR history: Link to PRs with meaningful review comments
-Decision log: At least one documented technical decision with alternatives considered
-
 Git history: we made sure we take incremental steps in the implementation of the feature.
 
-TODO: PR history: (provide link(s) to PRs with meaningful review comments)
+PR History:
+https://github.com/neu-cs3100/sp26-hw-cyb12-group-508/pull/2
+https://github.com/neu-cs3100/sp26-hw-cyb12-group-508/pull/4
+https://github.com/neu-cs3100/sp26-hw-cyb12-group-508/pull/5
 
 Decision log: A key technical decision was how to implement the dark mode sliding button. One option was to use a standard JavaFX ToggleButton styled purely with CSS, but this limited the ability to create a smooth sliding animation and nice appearance.
 Another option was to build a custom control button, which would provide maximum flexibility but require significantly more code and complexity.
 The chosen approach was to use a ToggleButton with a custom graphic composed of a track, thumb, and icons, and animate the thumb using JavaFX transitions. That gave us good balance between flexibility and complexity.
 
 4. Testing & Quality
-TODO: Unit tests for the feature
-TODO: Brief accessibility check: Does it support keyboard navigation?
+We have unit tests for the feature
 Known limitations: There are no known limitations.
-TODO: DOESN'T WORK KEY NAVIGATION
+Key navigation works.
 
 5. Feature Summary
-Screenshots: 2-3 screenshots showing the feature in action
-Integration notes: How does this feature connect to the rest of the app?
-Status: What's complete, what's in progress, what's known to be broken?
-
 Screenshots:
 ![lightmode](screenshots/lightmode.png)
 ![darkmode](screenshots/darkmode.png)
