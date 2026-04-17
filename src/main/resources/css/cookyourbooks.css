@@ -25,6 +25,68 @@
     -fx-padding: 0 0 12 4;
 }
 
+.theme-switch {
+    -fx-background-color: transparent;
+    -fx-padding: 8 0 0 0;
+    -fx-cursor: hand;
+    -fx-border-color: transparent;
+    -fx-background-radius: 24;
+}
+
+.theme-switch:hover {
+    -fx-background-color: transparent;
+}
+
+.theme-switch:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.theme-switch .theme-switch-graphic {
+    -fx-min-width: 84;
+    -fx-pref-width: 84;
+    -fx-max-width: 84;
+    -fx-min-height: 44;
+    -fx-pref-height: 44;
+    -fx-max-height: 44;
+}
+
+.theme-switch-track {
+    -fx-min-width: 84;
+    -fx-pref-width: 84;
+    -fx-max-width: 84;
+    -fx-min-height: 44;
+    -fx-pref-height: 44;
+    -fx-max-height: 44;
+    -fx-background-color: #f2f2f2;
+    -fx-background-radius: 22;
+}
+
+.theme-switch-thumb {
+    -fx-min-width: 36;
+    -fx-pref-width: 36;
+    -fx-max-width: 36;
+    -fx-min-height: 36;
+    -fx-pref-height: 36;
+    -fx-max-height: 36;
+    -fx-background-color: #1677ee;
+    -fx-background-radius: 18;
+    -fx-alignment: center;
+}
+
+.theme-switch-icon {
+    -fx-font-size: 21;
+    -fx-font-weight: bold;
+}
+
+.theme-switch-thumb-icon {
+    -fx-text-fill: white;
+}
+
+.theme-switch-track-icon {
+    -fx-text-fill: #c8ced8;
+}
+
 /* ── Navigation buttons ── */
 .nav-button {
     -fx-background-color: transparent;

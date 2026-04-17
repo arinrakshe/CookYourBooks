@@ -38,7 +38,7 @@
             <ComboBox fx:id="unitSystemComboBox" maxWidth="Infinity"/>
 
             <Region VBox.vgrow="ALWAYS"/>
-            <ToggleButton fx:id="darkModeToggle" text="Dark Mode" maxWidth="Infinity" styleClass="nav-button"/>
+            <ToggleButton fx:id="darkModeToggle" maxWidth="Infinity" styleClass="theme-switch"/>
         </VBox>
     </left>
 

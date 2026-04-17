@@ -16,6 +16,23 @@
     -fx-background-color: #1a1a1a;
 }
 
+/* ── Theme switch ── */
+.theme-switch-track {
+    -fx-background-color: #0d0f14;
+}
+
+.theme-switch-thumb {
+    -fx-background-color: #135df0;
+}
+
+.theme-switch-track-icon {
+    -fx-text-fill: #9ea6b2;
+}
+
+.theme-switch-thumb-icon {
+    -fx-text-fill: white;
+}
+
 /* ── Text ── */
 .section-title {
     -fx-text-fill: #e0e0e0;
