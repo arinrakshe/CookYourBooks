@@ -21,3 +21,4 @@ app/bin
 
 # Git hooks are managed via .githooks/ directory
 # The actual hooks in .git/hooks/ are not tracked
+.DS_Store
