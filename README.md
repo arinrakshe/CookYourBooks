@@ -182,15 +182,3 @@ mvn test    # runs against H2 — no DB / API keys required
 
 ---
 
-## Status
-
-This is a portfolio / learning project. Built solo. The backend is fully
-implemented and covered by a Spring context-load smoke test; the frontend is
-type-checked and production-builds cleanly via Vite. Live demo deployment is
-not currently hosted.
-
----
-
-## Contact
-
-**Arin Rakshe** — [github.com/arinrakshe](https://github.com/arinrakshe)
