@@ -18,6 +18,8 @@ app/bin
 
 # Environment variables (API keys, secrets)
 .env
+.env.local
+.env.*.local
 
 # Git hooks are managed via .githooks/ directory
 # The actual hooks in .git/hooks/ are not tracked

@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    @apply bg-cream text-coffee antialiased;
+  }
+
+  body {
+    background-image:
+      radial-gradient(circle at 0% 0%, rgba(194, 83, 29, 0.05), transparent 40%),
+      radial-gradient(circle at 100% 100%, rgba(135, 168, 120, 0.05), transparent 40%);
+    background-attachment: fixed;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display text-coffee;
+  }
+
+  input,
+  textarea,
+  select {
+    @apply bg-white border border-butter rounded-md px-3 py-2 text-coffee
+      focus:outline-none focus:ring-2 focus:ring-terracotta/40 focus:border-terracotta/60;
+  }
+
+  label {
+    @apply block text-sm font-medium text-coffee-light mb-1;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2
+      text-sm font-semibold transition-colors disabled:opacity-50
+      disabled:cursor-not-allowed;
+  }
+  .btn-primary {
+    @apply btn bg-terracotta text-white hover:bg-terracotta-dark;
+  }
+  .btn-secondary {
+    @apply btn bg-sage text-white hover:bg-sage-dark;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-coffee hover:bg-butter/60;
+  }
+  .btn-danger {
+    @apply btn bg-transparent text-terracotta-dark hover:bg-terracotta/10;
+  }
+  .card {
+    @apply bg-white rounded-xl shadow-card border border-butter/60;
+  }
+}

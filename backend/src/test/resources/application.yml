@@ -1,0 +1,31 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:cookyourbooks;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: false
+  sql:
+    init:
+      mode: never
+
+cookyourbooks:
+  jwt:
+    secret: dGVzdC1zZWNyZXQtZm9yLWp3dC1taW5pbXVtLTI1Ni1iaXRzLWxvbmctMTIzNDU2Nzg=
+    issuer: cookyourbooks-test
+    access-token-ttl-minutes: 60
+  cors:
+    allowed-origins: http://localhost:3000
+  gemini:
+    api-key: test
+    model: gemini-2.5-flash
+  usda:
+    api-key: DEMO_KEY
+    base-url: https://api.nal.usda.gov/fdc/v1
