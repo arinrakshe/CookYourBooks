@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { api, setToken } from "@/lib/api";
+import { authApi, setStoredUser, setToken } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -14,17 +14,18 @@ export const Route = createFileRoute("/register")({
 
 function RegisterPage() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ displayName: "", email: "", password: "" });
 
   const mutation = useMutation({
     mutationFn: (payload: typeof form) =>
-      api<any>("/api/auth/register", {
-        method: "POST",
-        body: JSON.stringify(payload),
+      authApi.register({
+        email: payload.email,
+        password: payload.password,
+        displayName: payload.displayName.trim() || undefined,
       }),
     onSuccess: (data) => {
-      const token = data?.token ?? data?.accessToken ?? data?.jwt;
-      if (token) setToken(token);
+      setToken(data.token);
+      setStoredUser(data.user);
       toast.success("Account created!");
       navigate({ to: "/" });
     },
@@ -46,9 +47,9 @@ function RegisterPage() {
         <div className="space-y-2">
           <Label>Name</Label>
           <Input
-            required
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            value={form.displayName}
+            onChange={(e) => setForm({ ...form, displayName: e.target.value })}
+            placeholder="Optional"
           />
         </div>
         <div className="space-y-2">
@@ -65,10 +66,11 @@ function RegisterPage() {
           <Input
             type="password"
             required
-            minLength={6}
+            minLength={8}
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
+          <p className="text-xs text-muted-foreground">At least 8 characters.</p>
         </div>
         <Button
           type="submit"

@@ -3,6 +3,7 @@ import {
   Outlet,
   Link,
   createRootRouteWithContext,
+  redirect,
   useRouter,
   HeadContent,
   Scripts,
@@ -11,6 +12,9 @@ import {
 import appCss from "../styles.css?url";
 import { Navbar } from "@/components/Navbar";
 import { Toaster } from "@/components/ui/sonner";
+
+const PUBLIC_PATHS = new Set(["/login", "/register"]);
+const TOKEN_KEY = "cyb_token";
 
 function NotFoundComponent() {
   return (
@@ -64,6 +68,18 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   {
+    beforeLoad: ({ location }) => {
+      // Auth is stored in localStorage — only enforce client-side.
+      if (typeof window === "undefined") return;
+      const hasToken = !!window.localStorage.getItem(TOKEN_KEY);
+      const isPublic = PUBLIC_PATHS.has(location.pathname);
+      if (!hasToken && !isPublic) {
+        throw redirect({ to: "/login" });
+      }
+      if (hasToken && isPublic) {
+        throw redirect({ to: "/" });
+      }
+    },
     head: () => ({
       meta: [
         { charSet: "utf-8" },

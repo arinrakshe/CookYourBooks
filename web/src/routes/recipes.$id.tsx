@@ -1,49 +1,46 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-import { api } from "@/lib/api";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { recipesApi, type Recipe, type RecipeIngredient } from "@/lib/api";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Clock, Minus, Plus, Users } from "lucide-react";
+import { ArrowLeft, Minus, Plus, Trash2, Users } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/recipes/$id")({
   component: RecipeDetail,
 });
 
-interface Ingredient {
-  name: string;
-  quantity?: number;
-  amount?: number;
-  unit?: string;
-}
-
-interface Recipe {
-  id: string | number;
-  title: string;
-  description?: string;
-  imageUrl?: string;
-  photoUrl?: string;
-  image?: string;
-  servings?: number;
-  cookTime?: string | number;
-  ingredients?: (Ingredient | string)[];
-  steps?: string[];
-  instructions?: string[];
-}
+const FALLBACK_IMG =
+  "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=1200&q=80";
 
 function RecipeDetail() {
   const { id } = Route.useParams();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+
   const { data, isLoading, error } = useQuery<Recipe>({
     queryKey: ["recipe", id],
-    queryFn: () => api(`/api/recipes/${id}`),
+    queryFn: () => recipesApi.get(id),
   });
 
-  const baseServings = data?.servings || 4;
-  const [servings, setServings] = useState(baseServings);
+  const baseServings = data?.servings && data.servings > 0 ? data.servings : 1;
+  const [servings, setServings] = useState<number>(baseServings);
 
-  // Sync once data loads
-  if (data && servings === 4 && baseServings !== 4) {
-    // no-op; we'll let user click to adjust
-  }
+  useEffect(() => {
+    if (data?.servings && data.servings > 0) {
+      setServings(data.servings);
+    }
+  }, [data?.id, data?.servings]);
+
+  const deleteMutation = useMutation({
+    mutationFn: () => recipesApi.remove(id),
+    onSuccess: () => {
+      toast.success("Recipe deleted");
+      qc.invalidateQueries({ queryKey: ["recipes"] });
+      navigate({ to: "/" });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   if (isLoading) {
     return (
@@ -67,13 +64,8 @@ function RecipeDetail() {
     );
   }
 
-  const img =
-    data.imageUrl ||
-    data.photoUrl ||
-    data.image ||
-    "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=1200&q=80";
-  const steps = data.steps || data.instructions || [];
-  const scale = servings / (baseServings || 1);
+  const img = data.imageUrl || FALLBACK_IMG;
+  const scale = servings / baseServings;
 
   return (
     <article className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
@@ -84,28 +76,38 @@ function RecipeDetail() {
         <ArrowLeft className="h-4 w-4" /> Back
       </Link>
 
-      <header className="mt-6">
-        <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl leading-tight">
-          {data.title}
-        </h1>
-        {data.description && (
-          <p className="mt-4 text-lg text-muted-foreground max-w-2xl">
-            {data.description}
-          </p>
-        )}
-        <div className="mt-5 flex flex-wrap gap-5 text-sm text-muted-foreground">
-          {data.cookTime && (
-            <span className="inline-flex items-center gap-1.5">
-              <Clock className="h-4 w-4" /> {data.cookTime}
-              {typeof data.cookTime === "number" ? " min" : ""}
-            </span>
+      <header className="mt-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl leading-tight">
+            {data.title}
+          </h1>
+          {data.description && (
+            <p className="mt-4 text-lg text-muted-foreground max-w-2xl">
+              {data.description}
+            </p>
           )}
-          {baseServings && (
-            <span className="inline-flex items-center gap-1.5">
-              <Users className="h-4 w-4" /> {baseServings} servings
-            </span>
-          )}
+          <div className="mt-5 flex flex-wrap gap-5 text-sm text-muted-foreground">
+            {data.servings != null && (
+              <span className="inline-flex items-center gap-1.5">
+                <Users className="h-4 w-4" /> {formatQty(data.servings)} servings
+              </span>
+            )}
+          </div>
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          disabled={deleteMutation.isPending}
+          onClick={() => {
+            if (confirm(`Delete "${data.title}"? This cannot be undone.`)) {
+              deleteMutation.mutate();
+            }
+          }}
+          className="text-muted-foreground hover:text-destructive"
+        >
+          <Trash2 className="h-4 w-4 mr-1.5" />
+          {deleteMutation.isPending ? "Deleting…" : "Delete"}
+        </Button>
       </header>
 
       <img
@@ -122,7 +124,7 @@ function RecipeDetail() {
 
             <div className="mt-4 flex items-center justify-between rounded-full bg-muted p-1">
               <button
-                onClick={() => setServings((s) => Math.max(1, s - 1))}
+                onClick={() => setServings((s) => Math.max(0.5, s - 0.5))}
                 className="h-9 w-9 grid place-items-center rounded-full bg-card shadow hover:bg-accent"
                 aria-label="Decrease servings"
               >
@@ -130,14 +132,14 @@ function RecipeDetail() {
               </button>
               <div className="text-center">
                 <div className="font-display text-2xl leading-none">
-                  {servings}
+                  {formatQty(servings)}
                 </div>
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
                   servings
                 </div>
               </div>
               <button
-                onClick={() => setServings((s) => s + 1)}
+                onClick={() => setServings((s) => s + 0.5)}
                 className="h-9 w-9 grid place-items-center rounded-full bg-card shadow hover:bg-accent"
                 aria-label="Increase servings"
               >
@@ -145,60 +147,84 @@ function RecipeDetail() {
               </button>
             </div>
 
-            <ul className="mt-6 space-y-3">
-              {(data.ingredients ?? []).map((ing, i) => {
-                if (typeof ing === "string") {
-                  return (
-                    <li
-                      key={i}
-                      className="flex gap-3 text-sm border-b border-border/60 pb-3 last:border-0"
-                    >
-                      <span className="text-primary">•</span> {ing}
-                    </li>
-                  );
-                }
-                const qty = ing.quantity ?? ing.amount;
-                const scaled =
-                  qty != null ? formatQty(qty * scale) : null;
-                return (
-                  <li
-                    key={i}
-                    className="flex justify-between gap-3 text-sm border-b border-border/60 pb-3 last:border-0"
-                  >
-                    <span>{ing.name}</span>
-                    <span className="text-muted-foreground tabular-nums">
-                      {scaled} {ing.unit ?? ""}
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
+            {data.ingredients.length === 0 ? (
+              <p className="mt-6 text-sm text-muted-foreground italic">
+                No ingredients listed.
+              </p>
+            ) : (
+              <ul className="mt-6 space-y-3">
+                {data.ingredients.map((ing) => (
+                  <IngredientRow key={ing.id} ingredient={ing} scale={scale} />
+                ))}
+              </ul>
+            )}
           </div>
         </aside>
 
         {/* Steps */}
         <section>
           <h2 className="font-display text-3xl">Method</h2>
-          <ol className="mt-6 space-y-6">
-            {steps.map((step, i) => (
-              <li key={i} className="flex gap-5">
-                <span className="shrink-0 grid place-items-center h-10 w-10 rounded-full bg-primary text-primary-foreground font-display text-lg">
-                  {i + 1}
-                </span>
-                <p className="pt-1.5 text-base leading-relaxed text-foreground/90">
-                  {step}
-                </p>
-              </li>
-            ))}
-          </ol>
+          {data.steps.length === 0 ? (
+            <p className="mt-6 text-muted-foreground italic">
+              No instructions yet.
+            </p>
+          ) : (
+            <ol className="mt-6 space-y-6">
+              {data.steps.map((step, i) => (
+                <li key={i} className="flex gap-5">
+                  <span className="shrink-0 grid place-items-center h-10 w-10 rounded-full bg-primary text-primary-foreground font-display text-lg">
+                    {i + 1}
+                  </span>
+                  <p className="pt-1.5 text-base leading-relaxed text-foreground/90">
+                    {step}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          )}
         </section>
       </div>
+
+      {data.notes && (
+        <section className="mt-12 rounded-2xl border border-border bg-card p-6 shadow-card">
+          <h2 className="font-display text-2xl">Notes</h2>
+          <p className="mt-3 text-muted-foreground whitespace-pre-line">
+            {data.notes}
+          </p>
+        </section>
+      )}
     </article>
+  );
+}
+
+function IngredientRow({
+  ingredient,
+  scale,
+}: {
+  ingredient: RecipeIngredient;
+  scale: number;
+}) {
+  const scaled =
+    ingredient.quantity != null ? formatQty(ingredient.quantity * scale) : null;
+  return (
+    <li className="flex justify-between gap-3 text-sm border-b border-border/60 pb-3 last:border-0">
+      <span className="flex-1">
+        {ingredient.rawText}
+        {ingredient.preparation && (
+          <span className="text-muted-foreground"> — {ingredient.preparation}</span>
+        )}
+      </span>
+      {scaled != null && (
+        <span className="text-muted-foreground tabular-nums whitespace-nowrap">
+          {scaled} {ingredient.unitCode ?? ""}
+        </span>
+      )}
+    </li>
   );
 }
 
 function formatQty(n: number): string {
   if (!isFinite(n)) return "";
   const rounded = Math.round(n * 100) / 100;
-  return rounded.toString();
+  return rounded.toString().replace(/\.?0+$/, "");
 }

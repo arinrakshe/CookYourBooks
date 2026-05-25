@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { api, setToken } from "@/lib/api";
+import { authApi, setStoredUser, setToken } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -17,18 +17,10 @@ function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
 
   const mutation = useMutation({
-    mutationFn: (payload: typeof form) =>
-      api<any>("/api/auth/login", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
+    mutationFn: (payload: typeof form) => authApi.login(payload),
     onSuccess: (data) => {
-      const token = data?.token ?? data?.accessToken ?? data?.jwt;
-      if (!token) {
-        toast.error("No token returned by server");
-        return;
-      }
-      setToken(token);
+      setToken(data.token);
+      setStoredUser(data.user);
       toast.success("Welcome back!");
       navigate({ to: "/" });
     },
