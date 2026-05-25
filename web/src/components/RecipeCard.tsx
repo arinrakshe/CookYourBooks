@@ -4,15 +4,15 @@ import { Clock, Users, ArrowUpRight } from "lucide-react";
 export interface RecipeSummary {
   id: string | number;
   title: string;
-  description?: string;
-  imageUrl?: string;
-  photoUrl?: string;
-  image?: string;
-  servings?: number;
-  cookTime?: string | number;
-  time?: string | number;
-  category?: string;
-  tags?: string[];
+  description?: string | null;
+  imageUrl?: string | null;
+  photoUrl?: string | null;
+  image?: string | null;
+  servings?: number | null;
+  cookTime?: string | number | null;
+  time?: string | number | null;
+  category?: string | null;
+  tags?: string[] | null;
 }
 
 const FALLBACK =

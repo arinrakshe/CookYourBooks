@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
-import { getToken, setToken } from "./api";
+import { clearAuth, getToken } from "./api";
 
 export function useAuth() {
   const [token, setTokenState] = useState<string | null>(() => getToken());
+
   useEffect(() => {
+    // Re-read on mount: lazy useState initializer ran during SSR with null;
+    // refresh from localStorage now that we're on the client.
+    setTokenState(getToken());
+
     const sync = () => setTokenState(getToken());
     window.addEventListener("cyb-auth", sync);
     window.addEventListener("storage", sync);
@@ -12,9 +17,10 @@ export function useAuth() {
       window.removeEventListener("storage", sync);
     };
   }, []);
+
   return {
     token,
     isAuthenticated: !!token,
-    logout: () => setToken(null),
+    logout: () => clearAuth(),
   };
 }

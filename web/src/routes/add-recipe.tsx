@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { api } from "@/lib/api";
+import { ocrApi, recipesApi, type RecipeInput } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -49,23 +49,17 @@ function ManualForm() {
   const [form, setForm] = useState({
     title: "",
     description: "",
-    photoUrl: "",
+    imageUrl: "",
     servings: 4,
     ingredients: "",
     steps: "",
   });
 
   const mutation = useMutation({
-    mutationFn: (payload: any) =>
-      api("/api/recipes", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      }),
-    onSuccess: (data: any) => {
+    mutationFn: (payload: RecipeInput) => recipesApi.create(payload),
+    onSuccess: (recipe) => {
       toast.success("Recipe saved!");
-      const id = data?.id ?? data?.recipe?.id;
-      if (id) navigate({ to: "/recipes/$id", params: { id: String(id) } });
-      else navigate({ to: "/" });
+      navigate({ to: "/recipes/$id", params: { id: String(recipe.id) } });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -73,19 +67,25 @@ function ManualForm() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.title.trim()) return toast.error("Title is required");
+
+    const ingredients = form.ingredients
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((rawText) => ({ rawText }));
+
+    const steps = form.steps
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean);
+
     mutation.mutate({
       title: form.title.trim(),
-      description: form.description.trim(),
-      photoUrl: form.photoUrl.trim() || undefined,
-      servings: Number(form.servings) || 1,
-      ingredients: form.ingredients
-        .split("\n")
-        .map((l) => l.trim())
-        .filter(Boolean),
-      steps: form.steps
-        .split("\n")
-        .map((l) => l.trim())
-        .filter(Boolean),
+      description: form.description.trim() || null,
+      imageUrl: form.imageUrl.trim() || null,
+      servings: Number(form.servings) || null,
+      steps,
+      ingredients,
     });
   };
 
@@ -112,8 +112,8 @@ function ManualForm() {
       <div className="grid sm:grid-cols-2 gap-5">
         <Field label="Photo URL">
           <Input
-            value={form.photoUrl}
-            onChange={(e) => setForm({ ...form, photoUrl: e.target.value })}
+            value={form.imageUrl}
+            onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
             placeholder="https://…"
           />
         </Field>
@@ -121,6 +121,7 @@ function ManualForm() {
           <Input
             type="number"
             min={1}
+            step="0.5"
             value={form.servings}
             onChange={(e) =>
               setForm({ ...form, servings: Number(e.target.value) })
@@ -162,17 +163,10 @@ function OcrForm() {
   const navigate = useNavigate();
 
   const mutation = useMutation({
-    mutationFn: async (f: File) => {
-      const fd = new FormData();
-      fd.append("file", f);
-      fd.append("image", f);
-      return api("/api/ocr/import", { method: "POST", body: fd });
-    },
-    onSuccess: (data: any) => {
+    mutationFn: (f: File) => ocrApi.importImage(f),
+    onSuccess: (data) => {
       toast.success("Recipe imported!");
-      const id = data?.id ?? data?.recipe?.id;
-      if (id) navigate({ to: "/recipes/$id", params: { id: String(id) } });
-      else navigate({ to: "/" });
+      navigate({ to: "/recipes/$id", params: { id: String(data.recipe.id) } });
     },
     onError: (e: Error) => toast.error(e.message),
   });

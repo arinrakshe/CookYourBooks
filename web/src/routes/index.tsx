@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { api } from "@/lib/api";
+import { recipesApi, type Recipe } from "@/lib/api";
 import { Input } from "@/components/ui/input";
 import { RecipeCard, type RecipeSummary } from "@/components/RecipeCard";
 import { Search, Sparkles, ArrowDown, Flame, BookOpen, ChefHat } from "lucide-react";
@@ -14,22 +14,25 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const [q, setQ] = useState("");
-  const { data, isLoading, error } = useQuery<RecipeSummary[]>({
+  const { data, isLoading, error } = useQuery<Recipe[]>({
     queryKey: ["recipes"],
-    queryFn: () =>
-      api("/api/recipes").then((d: any) => d.recipes ?? d.data ?? d ?? []),
+    queryFn: () => recipesApi.list(),
   });
 
-  const recipes = Array.isArray(data) ? data : [];
+  const recipes: Recipe[] = data ?? [];
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
     if (!term) return recipes;
-    return recipes.filter(
-      (r) =>
-        r.title?.toLowerCase().includes(term) ||
-        r.description?.toLowerCase().includes(term) ||
-        r.tags?.some((t) => t.toLowerCase().includes(term)),
-    );
+    return recipes.filter((r) => {
+      const haystack = [
+        r.title,
+        r.description || "",
+        ...r.ingredients.map((i) => i.rawText),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return haystack.includes(term);
+    });
   }, [q, recipes]);
 
   const revealRef = useReveal<HTMLDivElement>();
